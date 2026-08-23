@@ -9,6 +9,7 @@ dependencies = [
     "fastapi[standard]>=0.141.1",
     "passlib>=1.7.4",
     "psycopg2-binary>=2.9.12",
+    "pymysql>=1.2.0",
     "python-jose[cryptography]>=3.5.0",
     "python-multipart>=0.0.32",
     "sqlalchemy>=2.0.52",
