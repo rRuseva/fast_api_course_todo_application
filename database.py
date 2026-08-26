@@ -4,8 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 # SQLite3 connection
 SQL_ALCHEMY_DATABASE_URL = "sqlite:///./todosapp.db"
-engine = create_engine(SQL_ALCHEMY_DATABASE_URL,
-                       connect_args={"check_same_thread": False})
+engine = create_engine(SQL_ALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 
 # PostgreSQL connection
 # SQL_ALCHEMY_DATABASE_URL = "postgresql://postgres:admin@localhost/TodoApplicationDatabase"
