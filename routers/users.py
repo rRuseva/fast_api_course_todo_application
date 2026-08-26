@@ -4,8 +4,8 @@ from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status, Path, APIRouter
 from sqlalchemy.orm import Session
 
-from models import Users, Todos
-from database import SessionLocal
+from ..models import Users, Todos
+from ..database import SessionLocal
 from .auth import get_current_user
 
 
