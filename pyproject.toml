@@ -18,3 +18,13 @@ dependencies = [
     "sqlalchemy>=2.0.52",
     "uvicorn[standard]>=0.52.3",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = """
+    --log-cli-format='[%(asctime)s.%(msecs)03d][%(levelname)s] %(message)s' \
+    --log-cli-level=INFO \
+"""
+
+[tool.ruff]
+line-length = 120

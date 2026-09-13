@@ -55,7 +55,7 @@ async def create_todo(user: user_dependency, todo_request: TodoRequest, db: db_d
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Authentication failed")
-    todo_model = Todos(**todo_request.dict(), owner_id=user.get('id'))
+    todo_model = Todos(**todo_request.model_dump(), owner_id=user.get('id'))
 
     db.add(todo_model)
     db.commit()
@@ -73,7 +73,7 @@ async def update_todo(user: user_dependency,
         .filter(Todos.owner_id==user.get('id')).first()
     if todo_model is None:
         raise HTTPException(status_code=404, detail=f"Todo with the id {todo_id} is not available")
-    for field, value in todo_request.dict().items():
+    for field, value in todo_request.model_dump().items():
         print(f" Changing {field} to {value}")
         setattr(todo_model, field, value)
     db.add(todo_model)
