@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException, Request
+from fastapi.templating import Jinja2Templates
 from datetime import timedelta, datetime, timezone
 from typing import Annotated
 from pydantic import BaseModel, Field
@@ -28,8 +29,19 @@ def get_db():
 
 
 db_dependency = Annotated[Session, Depends(get_db)]
+templates = Jinja2Templates(directory="TodoApp/templates")
+
+### Pages ###
+@router.get('/login-page')
+def render_login_page(request: Request):
+    return templates.TemplateResponse(name="login.html", request=request)
+
+@router.get('/register-page')
+def render_register_page(request: Request):
+    return templates.TemplateResponse(name="register.html", request=request)
 
 
+### Endpoints ###
 def authenticate_user(username: str, password: str, db: db_dependency) -> Users:
     user = db.query(Users).filter(Users.username == username).first()
     if not user:
@@ -60,7 +72,8 @@ async def get_current_user(token: Annotated[str, Depends(oauth2bearer)]):
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Could not validate user.")
-
+    except Exception as e:
+        print(f"Exception: {e}")
 
 class CreateUserRequest(BaseModel):
     username: str
@@ -79,17 +92,20 @@ class Token(BaseModel):
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency,
                       create_user_request: CreateUserRequest):
-    create_user_model = Users(
-        email=create_user_request.email,
-        username=create_user_request.username,
-        first_name=create_user_request.first_name,
-        last_name=create_user_request.last_name,
-        role=create_user_request.role,
-        hashed_password=bcrypt_context.hash(create_user_request.password),
-        is_active=True, 
-        phone_number=create_user_request.phone_number
-    )
-
+    print(f"User to be created: {create_user_request}")
+    try:
+        create_user_model = Users(
+            email=create_user_request.email,
+            username=create_user_request.username,
+            first_name=create_user_request.first_name,
+            last_name=create_user_request.last_name,
+            role=create_user_request.role,
+            hashed_password=bcrypt_context.hash(create_user_request.password),
+            is_active=True,
+            phone_number=create_user_request.phone_number
+        )
+    except Exception as e:
+        print(f"Couldn't create User, exiting with error: {e}")
     db.add(create_user_model)
     db.commit()
 

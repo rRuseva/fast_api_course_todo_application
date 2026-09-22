@@ -11,7 +11,7 @@ app.dependency_overrides[get_current_user] = override_get_current_user
 
 
 def test_read_all_authenticated(create_todo):
-    response = client.get("/")
+    response = client.get("/todos")
 
     assert response.status_code == status.HTTP_200_OK
     logging.info(f"Response JSON: {response.json()}")
@@ -27,7 +27,7 @@ def test_read_all_authenticated(create_todo):
 
 
 def test_read_one_authenticated(create_todo):
-    response = client.get("/todo/1")
+    response = client.get("/todos/todo/1")
 
     assert response.status_code == status.HTTP_200_OK
     logging.info(f"Response JSON: {response.json()}")
@@ -45,7 +45,7 @@ def test_read_one_authenticated(create_todo):
 
 def test_read_one_authenticated_not_found(create_todo):
     wanted_id = 999
-    response = client.get(f"/todo/{wanted_id}")
+    response = client.get(f"/todos/todo/{wanted_id}")
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {"detail": f"Todo with the id {wanted_id} is not available"}
@@ -57,7 +57,7 @@ def test_create_todo(create_todo):
                 "priority": 5,
                 "complete": False
                 }
-    response = client.post('/todo/',json=new_todo)
+    response = client.post('/todos/todo',json=new_todo)
 
     assert response.status_code == status.HTTP_201_CREATED
 
@@ -78,7 +78,7 @@ def test_update_todo(create_todo):
         'complete': create_todo.complete
     }
 
-    response = client.put(f"/todo/{create_todo.id}", json=request_data)
+    response = client.put(f"/todos/todo/{create_todo.id}", json=request_data)
     assert response.status_code == status.HTTP_204_NO_CONTENT
 
     db = TestingSessionLocal()
@@ -98,13 +98,13 @@ def test_update_todo_not_found(create_todo):
         'complete': create_todo.complete
     }
     not_existing_id = 999
-    response = client.put(f"/todo/{not_existing_id}", json=request_data)
+    response = client.put(f"/todos/todo/{not_existing_id}", json=request_data)
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {"detail": f"Todo with the id {not_existing_id} is not available"}
 
 
 def test_delete_todo(create_todo):
-    response = client.delete(f"/todo/{create_todo.id}")
+    response = client.delete(f"/todos/todo/{create_todo.id}")
     assert response.status_code == status.HTTP_204_NO_CONTENT
 
     db = TestingSessionLocal()
@@ -114,6 +114,6 @@ def test_delete_todo(create_todo):
 
 def test_delete_todo_not_found():
     non_existing_id = 999
-    response = client.delete(f"/todo/{non_existing_id}")
+    response = client.delete(f"/todos/todo/{non_existing_id}")
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {"detail": f"Todo with the id {non_existing_id} is not available"}
