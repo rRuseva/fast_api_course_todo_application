@@ -9,7 +9,7 @@ from ..models import Todos, Users
 from ..routers.auth import bcrypt_context
 
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./testdb.db"
+SQLALCHEMY_DATABASE_URL = "sqlite:///./TodoApp/testdb.db"
 
 
 engine = create_engine(
@@ -34,7 +34,6 @@ def override_get_db():
 
 def override_get_current_user():
     return {"id": 1, "username": "admin1", "role": "admin"}
-
 
 
 @pytest.fixture
