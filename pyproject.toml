@@ -15,6 +15,7 @@ dependencies = [
     "psycopg2-binary>=2.9.12",
     "pymysql>=1.2.0",
     "pytest>=9.1.1",
+    "python-dotenv>=1.2.2",
     "python-jose[cryptography]>=3.5.0",
     "python-multipart>=0.0.32",
     "sqlalchemy>=2.0.52",
