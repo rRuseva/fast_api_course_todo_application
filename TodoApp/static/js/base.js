@@ -209,13 +209,121 @@
             } catch (error) {
                 console.error('Error:', error);
                 alert('An error occurred. Please try again.');
-                print(error)
             }
         });
     }
 
+    // Edit User JS
+    const editUserForm = document.getElementById('editUserForm');
+    if (editUserForm) {
+        editUserForm.addEventListener('submit', async function (event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+        var url = window.location.pathname;
+        // const userId = url.substring(url.lastIndexOf('/') + 1);
+
+        const payload = {
+            email: data.email,
+            username: data.username,
+            first_name: data.first_name,
+            last_name: data.last_name,
+            phone_number: data.phone_number,
+        };
+        console.log(payload)
+        try {
+            const token = getCookie('access_token');
+            console.log(token)
+            if (!token) {
+                throw new Error('Authentication token not found');
+            }
+
+            // console.log(`${userId}`)
+
+            const response = await fetch(`/user/user/`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                window.location.href = '/todos/todo-page'; // Redirect to the todo page
+            } else {
+                // Handle error
+                const errorData = await response.json();
+                alert(`Error: ${errorData.detail}`);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        }
+    });
+        
+    }
 
 
+    // Change user's password JS
+    const toggleButton = document.getElementById('toggleChangePasswordForm');
+    const changePasswordForm = document.getElementById('changePasswordForm');
+
+    if (changePasswordForm) {
+        toggleButton.addEventListener('click', () => {
+            changePasswordForm.hidden = !changePasswordForm.hidden;
+            toggleButton.setAttribute('aria-expanded', String(!changePasswordForm.hidden));
+        });
+        changePasswordForm.addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        if (data.password1 !== data.password2) {
+                alert("Passwords do not match");
+                return;
+            }
+
+        const payload = {
+            password: data.password,
+            new_password: data.password1
+        };
+
+        console.log(payload)
+        try {
+            const token = getCookie('access_token');
+            console.log(token)
+            if (!token) {
+                throw new Error('Authentication token not found');
+            }
+
+            const response = await fetch(`/user/password_change`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                document.cookie = 'access_token=; Max-Age=0; path=/';
+                window.location.href = '/auth/login-page';
+            } else {
+                // Handle error
+                const errorData = await response.json();
+                alert(`Error: ${errorData.detail}`);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        }
+    });
+
+    }
 
 
     // Helper function to get a cookie by name
@@ -246,7 +354,7 @@
             // Set the cookie's expiry date to a past date to delete it
             document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
         }
-    
+
         // Redirect to the login page
         window.location.href = '/auth/login-page';
     };

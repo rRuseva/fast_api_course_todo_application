@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from ..models import Todos
 from ..database import SessionLocal
 from .auth import get_current_user
-from starlette.responses import RedirectResponse
+from .routers_utils import redirect_to_login
 from fastapi.templating import Jinja2Templates
 
 templates = Jinja2Templates(directory="TodoApp/templates")
@@ -36,12 +36,6 @@ class TodoRequest(BaseModel):
     complete: bool = Field(default=False)
 
 
-def redirect_to_login():
-    redirect_response = RedirectResponse(url="/auth/login-page", status_code=status.HTTP_302_FOUND)
-    redirect_response.delete_cookie(key='access_token')
-
-    return redirect_response
-
 
 ### Pages ###
 @router.get('/todo-page')
@@ -51,7 +45,6 @@ async def render_todo_page(request: Request, db: db_dependency):
         if user is None:
             return  redirect_to_login()
 
-        print(f"User: {user.get('user')} found! ")
         todos = db.query(Todos).filter(Todos.owner_id==user.get('id')).all()
 
         return templates.TemplateResponse(name="todo.html", request=request, context={"todos": todos, "user": user})
@@ -87,7 +80,7 @@ async def render_edit_todo_page(request: Request, todo_id:int, db: db_dependency
         return redirect_to_login()
 
 
-### Endpoints ###
+## Endpoints ###
 @router.get("/", status_code=status.HTTP_200_OK)
 async def read_all(user: user_dependency, db: db_dependency):
     if user is None:
