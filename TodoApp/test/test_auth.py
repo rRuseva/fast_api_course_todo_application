@@ -8,6 +8,7 @@ from fastapi import HTTPException
 
 app.dependency_overrides[get_db] = override_get_db
 
+
 def test_authenticate_user(create_admin_user):
     db = TestingSessionLocal()
 
@@ -16,8 +17,8 @@ def test_authenticate_user(create_admin_user):
 
     wrong_password_user = authenticate_user(create_admin_user.username, "wrongpassword", db)
     assert wrong_password_user is False
-    
-    authenticated_user = authenticate_user(create_admin_user.username,  "admin123", db)
+
+    authenticated_user = authenticate_user(create_admin_user.username, "admin123", db)
     assert authenticated_user is not None
     assert authenticated_user.username == create_admin_user.username
 
@@ -40,21 +41,21 @@ def test_create_access_token():
 
 @pytest.mark.asyncio
 async def get_current_user_valid_token():
-    encode = {'sub': 'testuser', 'id': 1, 'role': 'admin'}
+    encode = {"sub": "testuser", "id": 1, "role": "admin"}
     token = jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
     user = await get_current_user(token)
-    assert user == {'user': 'testuser', 'id': 1, 'role': 'admin'}
+    assert user == {"user": "testuser", "id": 1, "role": "admin"}
 
 
 @pytest.mark.asyncio
 async def get_current_user_missing_payload():
 
-    encode = {'role': 'user'}
+    encode = {"role": "user"}
     token = jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
     user = await get_current_user(token)
 
     with pytest.raises(HTTPException) as exc_info:
         await get_current_user(token)
-    
+
     assert exc_info.value.status_code == 401
     assert exc_info.value.detail == "Could not validate user."

@@ -24,6 +24,7 @@ client = TestClient(app)
 
 Base.metadata.create_all(bind=engine)
 
+
 def override_get_db():
     db = TestingSessionLocal()
     try:
@@ -38,11 +39,7 @@ def override_get_current_user():
 
 @pytest.fixture
 def create_todo():
-    todo = Todos(title="Learn ot code!",
-                 description="Need to learn everyday!",
-                 priority=5,
-                 complete=False,
-                 owner_id = 1)
+    todo = Todos(title="Learn ot code!", description="Need to learn everyday!", priority=5, complete=False, owner_id=1)
     db = TestingSessionLocal()
     db.add(todo)
     db.commit()
@@ -55,22 +52,21 @@ def create_todo():
 
 @pytest.fixture
 def create_admin_user():
-    user = Users( 
-        email = "admin@example.com",
-        username = "admin1",
-        first_name = "Admin",
-        last_name = "User",
-        hashed_password = bcrypt_context.hash("admin123"),
-        role = "admin",
-        phone_number = "359883250147",
+    user = Users(
+        email="admin@example.com",
+        username="admin1",
+        first_name="Admin",
+        last_name="User",
+        hashed_password=bcrypt_context.hash("admin123"),
+        role="admin",
+        phone_number="359883250147",
     )
     db = TestingSessionLocal()
     db.add(user)
     db.commit()
-    
+
     yield user
 
     with engine.connect() as connection:
         connection.execute(text("DELETE FROM users"))
         connection.commit()
-    

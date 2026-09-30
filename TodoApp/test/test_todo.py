@@ -15,12 +15,16 @@ def test_read_all_authenticated(create_todo):
 
     assert response.status_code == status.HTTP_200_OK
     logging.info(f"Response JSON: {response.json()}")
-    expected_todo = [{"title": create_todo.title,
-                                "description": create_todo.description,
-                                "priority": create_todo.priority,
-                                "complete": create_todo.complete,
-                                "owner_id": create_todo.owner_id,   
-                                "id": create_todo.id}]
+    expected_todo = [
+        {
+            "title": create_todo.title,
+            "description": create_todo.description,
+            "priority": create_todo.priority,
+            "complete": create_todo.complete,
+            "owner_id": create_todo.owner_id,
+            "id": create_todo.id,
+        }
+    ]
     logging.info(f"Expected: {expected_todo}")
     logging.info(response.json() == expected_todo)
     assert response.json() == expected_todo
@@ -31,16 +35,17 @@ def test_read_one_authenticated(create_todo):
 
     assert response.status_code == status.HTTP_200_OK
     logging.info(f"Response JSON: {response.json()}")
-    expected_todo = {"title": create_todo.title,
-                    "description": create_todo.description,
-                    "priority": create_todo.priority,
-                    "complete": create_todo.complete,
-                    "owner_id": create_todo.owner_id,   
-                    "id": create_todo.id}
+    expected_todo = {
+        "title": create_todo.title,
+        "description": create_todo.description,
+        "priority": create_todo.priority,
+        "complete": create_todo.complete,
+        "owner_id": create_todo.owner_id,
+        "id": create_todo.id,
+    }
     logging.info(f"Expected: {expected_todo}")
     logging.info(response.json() == expected_todo)
     assert response.json() == expected_todo
-
 
 
 def test_read_one_authenticated_not_found(create_todo):
@@ -52,30 +57,26 @@ def test_read_one_authenticated_not_found(create_todo):
 
 
 def test_create_todo(create_todo):
-    new_todo = {"title": "New TODO",
-                "description":  "New TODO description",
-                "priority": 5,
-                "complete": False
-                }
-    response = client.post('/todos/todo',json=new_todo)
+    new_todo = {"title": "New TODO", "description": "New TODO description", "priority": 5, "complete": False}
+    response = client.post("/todos/todo", json=new_todo)
 
     assert response.status_code == status.HTTP_201_CREATED
 
     db = TestingSessionLocal()
     model = db.query(Todos).filter(Todos.id == 2).first()
-    assert model.title == new_todo.get('title')
-    assert model.description == new_todo.get('description')
-    assert model.priority == new_todo.get('priority')
-    assert model.complete == new_todo.get('complete')
+    assert model.title == new_todo.get("title")
+    assert model.description == new_todo.get("description")
+    assert model.priority == new_todo.get("priority")
+    assert model.complete == new_todo.get("complete")
 
 
 def test_update_todo(create_todo):
     logging.info(f"Created TODO: {create_todo.title}")
     request_data = {
-        'title': "Updated todo title",
-        'description': create_todo.description,
-        'priority': create_todo.priority,
-        'complete': create_todo.complete
+        "title": "Updated todo title",
+        "description": create_todo.description,
+        "priority": create_todo.priority,
+        "complete": create_todo.complete,
     }
 
     response = client.put(f"/todos/todo/{create_todo.id}", json=request_data)
@@ -83,19 +84,19 @@ def test_update_todo(create_todo):
 
     db = TestingSessionLocal()
     model = db.query(Todos).filter(Todos.id == create_todo.id).first()
-    assert model.title == request_data.get('title')
-    assert model.description == request_data.get('description')
-    assert model.priority == request_data.get('priority')
-    assert model.complete == request_data.get('complete')
+    assert model.title == request_data.get("title")
+    assert model.description == request_data.get("description")
+    assert model.priority == request_data.get("priority")
+    assert model.complete == request_data.get("complete")
 
 
 def test_update_todo_not_found(create_todo):
     logging.info(f"Created TODO: {create_todo.title}")
     request_data = {
-        'title': "Updated todo title",
-        'description': create_todo.description,
-        'priority': create_todo.priority,
-        'complete': create_todo.complete
+        "title": "Updated todo title",
+        "description": create_todo.description,
+        "priority": create_todo.priority,
+        "complete": create_todo.complete,
     }
     not_existing_id = 999
     response = client.put(f"/todos/todo/{not_existing_id}", json=request_data)

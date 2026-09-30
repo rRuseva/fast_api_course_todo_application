@@ -9,8 +9,8 @@ load_dotenv()
 # SQL_ALCHEMY_DATABASE_URL = "sqlite:///./TodoApp/todosapp.db"
 # engine = create_engine(SQL_ALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 
-db_user_name=os.getenv('DB_USER')
-db_password=os.getenv('DB_PASSWORD')
+db_user_name = os.getenv("DB_USER")
+db_password = os.getenv("DB_PASSWORD")
 # PostgreSQL connection
 SQL_ALCHEMY_DATABASE_URL = f"postgresql://{db_user_name}:{db_password}@ep-bold-hat-b2yar57d-pooler.c-6.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
 engine = create_engine(SQL_ALCHEMY_DATABASE_URL)
@@ -25,6 +25,6 @@ engine = create_engine(SQL_ALCHEMY_DATABASE_URL)
 # engine = create_engine(SQL_ALCHEMY_DATABASE_URL)
 
 
-SessionLocal = sessionmaker(autocommit = False, autoflush = False, bind=engine)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()

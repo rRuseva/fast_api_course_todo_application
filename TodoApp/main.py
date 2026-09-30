@@ -17,9 +17,10 @@ app.mount("/static", StaticFiles(directory="TodoApp/static"), name="static")
 def test(request: Request):
     return RedirectResponse(url="/todos/todo-page", status_code=status.HTTP_302_FOUND)
 
+
 @app.get("/healthy")
 def health_check():
-    return {'status': 'healthy'}
+    return {"status": "healthy"}
 
 
 app.include_router(auth.router)
