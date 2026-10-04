@@ -1,14 +1,17 @@
 from typing import Annotated
-from fastapi import Depends, HTTPException, status, Path, APIRouter
+from fastapi import Depends, HTTPException, status, Path, APIRouter, Request
 from sqlalchemy.orm import Session
 
-from ..models import Todos
+from ..models import Todos, Users
 from ..database import SessionLocal
 from .auth import get_current_user
 from .todos import TodoRequest
+from .routers_utils import redirect_to_login
+from fastapi.templating import Jinja2Templates
 
 
 router = APIRouter(prefix="/admin", tags=["admin"])
+templates = Jinja2Templates(directory="TodoApp/templates")
 
 
 def get_db():
@@ -23,6 +26,37 @@ db_dependency = Annotated[Session, Depends(get_db)]
 user_dependency = Annotated[dict, Depends(get_current_user)]
 
 
+### Pages ###
+@router.get("/todos-page")
+async def render_todo_page(request: Request, db: db_dependency):
+    try:
+        user = await get_current_user(request.cookies.get("access_token"))
+        if user is None:
+            return redirect_to_login()
+        entries = (
+            db.query(Todos, Users.username, Users.id)
+            .join(Users, Users.id == Todos.owner_id)
+            .order_by(Users.id, Todos.id)
+            .all()
+        )
+        todos_by_user = {}
+        for todo, username, user_id in entries:
+            todos_by_user.setdefault(
+                user_id, {"username": username, "todos": []}
+            )["todos"].append(todo)
+
+        return templates.TemplateResponse(
+            name="admin-todos.html",
+            request=request,
+            context={"users_todos": list(todos_by_user.values()), "user": user},
+        )
+    except Exception as e:
+        print(f"Exception: {e}")
+        # return redirect_to_login()
+
+
+
+## Endpoints ###
 @router.get("/", status_code=status.HTTP_200_OK)
 async def read_all(user: user_dependency, db: db_dependency):
     if user is None or user.get("role") != "admin":
