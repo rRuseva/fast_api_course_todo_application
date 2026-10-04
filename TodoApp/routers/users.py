@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Literal
 from pydantic import BaseModel, Field
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status, APIRouter, Request
@@ -8,6 +8,7 @@ from fastapi.templating import Jinja2Templates
 from ..models import Users, Todos
 from ..database import SessionLocal
 from .auth import get_current_user
+from ..schemas import UserRequest, UserVerification
 from .routers_utils import redirect_to_login
 
 templates = Jinja2Templates(directory="TodoApp/templates")
@@ -29,21 +30,12 @@ db_dependency = Annotated[Session, Depends(get_db)]
 user_dependency = Annotated[dict, Depends(get_current_user)]
 
 
-class UserVerification(BaseModel):
-    password: str
-    new_password: str = Field(min_length=6)
-
-
-class UserRequest(BaseModel):
-    email: str
-    first_name: str
-    last_name: str
-    phone_number: str = Field(pattern=r"^(\+\d*)?\s*\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$")
-
-
 ### Pages ###
 @router.get("/user-page/")
-async def render_user_page(request: Request, db: db_dependency):
+async def render_user_page(request: Request,
+                                db: db_dependency,
+                                return_to: Literal["/todos/todo-page", "/admin/todos-page"]
+                        ):
     try:
         user = await get_current_user(request.cookies.get("access_token"))
         if user is None:
@@ -56,7 +48,9 @@ async def render_user_page(request: Request, db: db_dependency):
     try:
         user_data = db.query(Users).filter(Users.id == user.get("id")).first()
         return templates.TemplateResponse(
-            name="user.html", request=request, context={"user_data": user_data, "user": user}
+            name="user.html",
+            request=request,
+            context={"user_data": user_data, "user": user, "return_to": return_to}
         )
     except Exception as e:
         print(f"Exception: {e}")

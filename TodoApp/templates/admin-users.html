@@ -2,59 +2,39 @@
 <div class="container">
     <div class="card text-center">
         <div class="card-header">
-            <h3>Hello, {{ user_data.username }} </h3>
+            List of all users
         </div>
         <div class="card-body">
-            <div class="card-body">
-            <form id="editUserForm">
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="first_name">First Name</label>
-                        <input type="text" value="{{ user_data.first_name }}" class="form-control"  name="first_name" required>
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label for="last_name">Last Name</label>
-                        <input type="text" value="{{ user_data.last_name }}" class="form-control"  name="last_name" required>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="email">Email</label>
-                        <input type="email" value="{{ user_data.email }}" class="form-control" id="email" name="email" autocomplete="email" required>
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label for="phone_number">Phone Number</label>
-                        <input type="tel" value="{{ user_data.phone_number }}" class="form-control" id="phone_number" name="phone_number" required>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary">Save changes</button>
-                <button type="button" class="btn btn-info" id="toggleChangePasswordForm" aria-controls="toggleChangePasswordForm" aria-expanded="false">
-                    Change Password
-                </button>
-                <!-- <a href="change-password-page" class="btn btn-secondary">Change password!</a> -->
-                <a href="/todos/todo-page" class="btn btn-success">Back</a>
-            </form>
-            <div class="card-body">
-                <form id="changePasswordForm" hidden>
-                    <div class="form-row">
-                        <div class="form-group col">
-                            <label>Password</label>
-                            <input type="password" class="form-control" name="password" autocomplete="password" required>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group col"">
-                            <label>New Password</label>
-                            <input type="password" class="form-control" name="password1" autocomplete="new-password" required>
-                        </div>
-                        <div class="form-group col"">
-                            <label>Confirm Password</label>
-                            <input type="password" class="form-control" name="password2" autocomplete="new-password" required>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Change</button> 
-                </form>
-            </div>
+            <h5 class="card-title">List all users</h5>
+            <p class="card-text">
+                Information regarding users!
+            </p>
+            <table class="table table-header">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Username</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Role</th>
+                        <th scope="col">Is active</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr class="pointers" >
+                        <td> {{loop.index}} </td>
+                        <td> {{user.username}} </td>
+                        <td> {{user.email}} </td>
+                        <td> {{user.role}} </td>
+                        <td> {{user.is_active}} </td>
+                        <td>
+                            <a href="/admin/edit-user-page/{{user.id}}" class="btn btn-info">Edit</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

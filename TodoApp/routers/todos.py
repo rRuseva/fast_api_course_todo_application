@@ -1,5 +1,4 @@
-from typing import Annotated
-from pydantic import BaseModel, Field
+from typing import Annotated, Literal
 from fastapi import Depends, HTTPException, status, Path, APIRouter, Request
 from sqlalchemy.orm import Session
 
@@ -7,6 +6,7 @@ from ..models import Todos
 from ..database import SessionLocal
 from .auth import get_current_user
 from .routers_utils import redirect_to_login
+from ..schemas import TodoRequest
 from fastapi.templating import Jinja2Templates
 
 templates = Jinja2Templates(directory="TodoApp/templates")
@@ -25,13 +25,6 @@ def get_db():
 
 db_dependency = Annotated[Session, Depends(get_db)]
 user_dependency = Annotated[dict, Depends(get_current_user)]
-
-
-class TodoRequest(BaseModel):
-    title: str = Field(min_length=3, max_length=100)
-    description: str = Field(min_length=3, max_length=200)
-    priority: int = Field(gt=0, lt=6)
-    complete: bool = Field(default=False)
 
 
 ### Pages ###
@@ -64,14 +57,21 @@ async def render_add_todo_page(request: Request, db: db_dependency):
 
 
 @router.get("/edit-todo-page/{todo_id}")
-async def render_edit_todo_page(request: Request, todo_id: int, db: db_dependency):
+async def render_edit_todo_page(request: Request,
+                                todo_id: int,
+                                db: db_dependency,
+                                return_to: Literal["/todos/todo-page", "/admin/todos-page"]
+                            ):
     try:
         user = await get_current_user(request.cookies.get("access_token"))
         if user is None:
             return redirect_to_login()
 
         todo = db.query(Todos).filter(Todos.id == todo_id).first()
-        return templates.TemplateResponse(name="edit-todo.html", request=request, context={"todo": todo, "user": user})
+        return templates.TemplateResponse(name="edit-todo.html",
+        request=request,
+        context={"todo": todo, "user": user, "return_to": return_to}
+        )
     except Exception as e:
         print(f"Exception: {e}")
         return redirect_to_login()

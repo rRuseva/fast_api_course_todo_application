@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Literal
 from fastapi import Depends, HTTPException, status, Path, APIRouter, Request
 from sqlalchemy.orm import Session
 
@@ -6,6 +6,8 @@ from ..models import Todos, Users
 from ..database import SessionLocal
 from .auth import get_current_user
 from .todos import TodoRequest
+from .users import UserRequest
+from ..schemas import TodoRequest, UserRequest, AdminUserRequest
 from .routers_utils import redirect_to_login
 from fastapi.templating import Jinja2Templates
 
@@ -42,7 +44,7 @@ async def render_todo_page(request: Request, db: db_dependency):
         todos_by_user = {}
         for todo, username, user_id in entries:
             todos_by_user.setdefault(
-                user_id, {"username": username, "todos": []}
+                user_id, {"username": username, "user_id": user_id, "todos": []}
             )["todos"].append(todo)
 
         return templates.TemplateResponse(
@@ -52,8 +54,53 @@ async def render_todo_page(request: Request, db: db_dependency):
         )
     except Exception as e:
         print(f"Exception: {e}")
-        # return redirect_to_login()
+        return redirect_to_login()
 
+
+@router.get("/users-page")
+async def render_users_page(request: Request, db: db_dependency):
+    try:
+        user = await get_current_user(request.cookies.get("access_token"))
+        if user is None:
+            return redirect_to_login()
+        users = (
+            db.query(Users).all()
+        )
+        
+        return templates.TemplateResponse(
+            name="admin-users.html",
+            request=request,
+            context={"users": users, "user": user},
+        )
+    except Exception as e:
+        print(f"Exception: {e}")
+        return redirect_to_login()
+
+
+
+@router.get("/edit-user-page/{user_id}")
+async def render_edit_user_page(request: Request,
+                                user_id: int,
+                                db: db_dependency,
+                            ):
+    try:
+        user = await get_current_user(request.cookies.get("access_token"))
+        if user is None:
+            return redirect_to_login()
+
+    except Exception as e:
+        print(f"Exception: {e}")
+        return redirect_to_login()
+
+    try:
+        user_data = db.query(Users).filter(Users.id == user_id).first()
+        return templates.TemplateResponse(
+            name="edit-users-by-admin.html",
+            request=request,
+            context={"user_data": user_data, "user": user}
+        )
+    except Exception as e:
+        print(f"Exception: {e}")
 
 
 ## Endpoints ###
@@ -86,4 +133,20 @@ async def update_todo(user: user_dependency, todo_request: TodoRequest, db: db_d
         print(f" Changing {field} to {value}")
         setattr(todo_model, field, value)
     db.add(todo_model)
+    db.commit()
+
+
+@router.put("/user/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def update_user(user_id:int,user: user_dependency, user_request: UserRequest, db: db_dependency):
+    if user is None or user.get("role") != "admin":
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication failed")
+    user_model = db.query(Users).filter(Users.id == user_id).first()
+    if user_model is None:
+        raise HTTPException(status_code=404, detail=f"User with the id {user_id} is not available")
+
+    for field, value in user_request.model_dump().items():
+        print(f" Changing {field} to {value}")
+        setattr(user_model, field, value)
+
+    db.add(user_model)
     db.commit()
