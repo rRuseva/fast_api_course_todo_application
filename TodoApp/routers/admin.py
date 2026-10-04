@@ -94,10 +94,11 @@ async def render_edit_user_page(request: Request,
 
     try:
         user_data = db.query(Users).filter(Users.id == user_id).first()
+        print(f"User data: {user_data}")
         return templates.TemplateResponse(
-            name="edit-users-by-admin.html",
+            name="user.html",
             request=request,
-            context={"user_data": user_data, "user": user}
+            context={"user_data": user_data, "user": user, "is_admin": True}
         )
     except Exception as e:
         print(f"Exception: {e}")
@@ -137,14 +138,14 @@ async def update_todo(user: user_dependency, todo_request: TodoRequest, db: db_d
 
 
 @router.put("/user/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def update_user(user_id:int,user: user_dependency, user_request: UserRequest, db: db_dependency):
+async def update_user(user_id:int,user: user_dependency, user_admin_request: AdminUserRequest, db: db_dependency):
     if user is None or user.get("role") != "admin":
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication failed")
     user_model = db.query(Users).filter(Users.id == user_id).first()
     if user_model is None:
         raise HTTPException(status_code=404, detail=f"User with the id {user_id} is not available")
 
-    for field, value in user_request.model_dump().items():
+    for field, value in user_admin_request.model_dump().items():
         print(f" Changing {field} to {value}")
         setattr(user_model, field, value)
 

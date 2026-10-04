@@ -33,8 +33,7 @@ user_dependency = Annotated[dict, Depends(get_current_user)]
 ### Pages ###
 @router.get("/user-page/")
 async def render_user_page(request: Request,
-                                db: db_dependency,
-                                return_to: Literal["/todos/todo-page", "/admin/todos-page"]
+                                db: db_dependency
                         ):
     try:
         user = await get_current_user(request.cookies.get("access_token"))
@@ -50,7 +49,7 @@ async def render_user_page(request: Request,
         return templates.TemplateResponse(
             name="user.html",
             request=request,
-            context={"user_data": user_data, "user": user, "return_to": return_to}
+            context={"user_data": user_data, "user": user, "is_admin": False}
         )
     except Exception as e:
         print(f"Exception: {e}")

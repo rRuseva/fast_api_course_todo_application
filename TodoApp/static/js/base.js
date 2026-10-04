@@ -213,6 +213,8 @@
         });
     }
 
+
+    
     // Edit User JS
     const editUserForm = document.getElementById('editUserForm');
     if (editUserForm) {
@@ -221,17 +223,24 @@
         const form = event.target;
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
+        const isAdmin = form.dataset.isAdmin === "true";
         var url = window.location.pathname;
         // const userId = url.substring(url.lastIndexOf('/') + 1);
-
+        console.log(`url: ${url}`);
+        console.log(`isAdmin: ${isAdmin}`);
         const payload = {
             email: data.email,
-            username: data.username,
             first_name: data.first_name,
             last_name: data.last_name,
             phone_number: data.phone_number,
         };
+        if (isAdmin) {
+            payload.username = data.username,
+            payload.role = data.role
+            payload.is_active = data.is_active;
+        }
         console.log(payload)
+
         try {
             const token = getCookie('access_token');
             console.log(token)
@@ -240,8 +249,19 @@
             }
 
             // console.log(`${userId}`)
-
-            const response = await fetch(`/user/user/`, {
+            if (isAdmin) {
+                const userId = url.substring(url.lastIndexOf('/') + 1);
+                console.log(`url: ${url}`);
+                update_url = `/admin/user/${userId}`
+            }
+            else {
+                update_url = "/user/user/"
+            }
+            // const userId = url.substring(url.lastIndexOf('/') + 1);
+            // console.log(`url: ${url}`);
+            // update_url = isAdmin ? "/admin/user/${userId}" : "/user/user/"
+            
+            const response = await fetch(update_url, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -264,7 +284,6 @@
     });
         
     }
-
 
     // Change user's password JS
     const toggleButton = document.getElementById('toggleChangePasswordForm');
