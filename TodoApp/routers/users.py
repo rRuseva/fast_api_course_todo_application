@@ -49,7 +49,7 @@ async def render_user_page(request: Request,
         return templates.TemplateResponse(
             name="user.html",
             request=request,
-            context={"user_data": user_data, "user": user, "is_admin": False}
+            context={"user_data": user_data, "user": user, "is_admin": False, "return_url": "/todos/todo-page"}
         )
     except Exception as e:
         print(f"Exception: {e}")

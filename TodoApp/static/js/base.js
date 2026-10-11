@@ -20,9 +20,11 @@
                 var url = window.location.pathname;
                 const ownerId = url.substring(url.lastIndexOf('/') + 1);
                 update_url = `/admin/todo/${ownerId}`
+                redirect_url = '/admin/todos-page'
             }
             else {
                 update_url = '/todos/todo'
+                redirect_url = '/todos/todo-page'
             }
 
             try {
@@ -37,6 +39,7 @@
 
                 if (response.ok) {
                     form.reset(); // Clear the form
+                    window.location.href = redirect_url; // Redirect to the todo page
                 } else {
                     // Handle error
                     const errorData = await response.json();
@@ -89,8 +92,9 @@
                 body: JSON.stringify(payload)
             });
 
+            redirect_url = isAdmin ? `/admin/todos-page` : `/todos/todo-page`;
             if (response.ok) {
-                window.location.href = '/todos/todo-page'; // Redirect to the todo page
+                window.location.href = redirect_url; // Redirect to the todo page
             } else {
                 // Handle error
                 const errorData = await response.json();
@@ -114,9 +118,11 @@
 
                 if (isAdmin) {
                     update_url = `/admin/todo/${todoId}`;
+                    redirect_url = '/admin/todos-page';
                 }
                 else {
                     update_url = `/todos/todo/${todoId}`;
+                    redirect_url = '/todos/todo-page';
                 }
                 const response = await fetch(update_url, {
                     method: 'DELETE',
@@ -125,9 +131,10 @@
                     }
                 });
 
+                
                 if (response.ok) {
                     // Handle success
-                    window.location.href = '/todos/todo-page'; // Redirect to the todo page
+                    window.location.href = redirect_url; // Redirect to the todo page
                 } else {
                     // Handle error
                     const errorData = await response.json();
@@ -272,9 +279,11 @@
                 const userId = url.substring(url.lastIndexOf('/') + 1);
                 console.log(`url: ${url}`);
                 update_url = `/admin/user/${userId}`
+                redirect_url = '/admin/users-page'
             }
             else {
                 update_url = "/user/user/"
+                redirect_url = '/todos/todo-page'
             }
 
             const response = await fetch(update_url, {
@@ -287,7 +296,7 @@
             });
 
             if (response.ok) {
-                window.location.href = '/todos/todo-page'; // Redirect to the todo page
+                window.location.href = redirect_url; // Redirect to the todo page
             } else {
                 // Handle error
                 const errorData = await response.json();

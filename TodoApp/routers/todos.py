@@ -50,7 +50,7 @@ async def render_add_todo_page(request: Request, db: db_dependency):
         if user is None:
             return redirect_to_login()
 
-        return templates.TemplateResponse(name="add-todo.html", request=request, context={"user": user})
+        return templates.TemplateResponse(name="add-todo.html", request=request, context={"user": user, "return_url": "/todos/todo-page"})
     except Exception as e:
         print(f"Exception: {e}")
         return redirect_to_login()
@@ -71,7 +71,7 @@ async def render_edit_todo_page(request: Request,
         return templates.TemplateResponse(name="edit-todo.html",
         request=request,
         # context={"todo": todo, "user": user, "return_to": return_to, "is_admin": False}
-        context={"todo": todo, "user": user, "is_admin": False}
+        context={"todo": todo, "user": user, "is_admin": False, "return_url": "/todos/todo-page"}
         )
     except Exception as e:
         print(f"Exception: {e}")

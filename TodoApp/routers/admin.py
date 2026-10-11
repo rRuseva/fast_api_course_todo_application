@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from ..models import Todos, Users
 from ..database import SessionLocal
 from .auth import get_current_user
-from ..schemas import TodoRequest, UserRequest, AdminUserRequest, AdminTodoRequest
+from ..schemas import TodoRequest, AdminUserRequest
 from .routers_utils import redirect_to_login
 from fastapi.templating import Jinja2Templates
 
@@ -95,7 +95,7 @@ async def render_edit_user_page(request: Request,
         return templates.TemplateResponse(
             name="user.html",
             request=request,
-            context={"user_data": user_data, "user": user, "is_admin": True}
+            context={"user_data": user_data, "user": user, "is_admin": True, "return_url": "/admin/users-page"}
         )
     except Exception as e:
         print(f"Exception: {e}")
@@ -120,7 +120,7 @@ async def render_edit_todo_page(request: Request,
         return templates.TemplateResponse(
             name="edit-todo.html",
             request=request,
-            context={"todo": todo_data, "user": user, "is_admin": True}
+            context={"todo": todo_data, "user": user, "is_admin": True, "return_url": "/admin/todos-page"}
         )
     except Exception as e:
         print(f"Exception: {e}")
@@ -141,7 +141,7 @@ async def render_add_todo_page(request: Request, owner_id: int, db: db_dependenc
         return templates.TemplateResponse(
             name="add-todo.html",
             request=request,
-            context={"user": user, "owner_id": owner_id, "is_admin": True}
+            context={"user": user, "owner_id": owner_id, "is_admin": True, "return_url": "/admin/todos-page"}
         )
     except Exception as e:
         print(f"Exception: {e}")
