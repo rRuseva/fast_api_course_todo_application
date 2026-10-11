@@ -60,7 +60,7 @@ async def render_add_todo_page(request: Request, db: db_dependency):
 async def render_edit_todo_page(request: Request,
                                 todo_id: int,
                                 db: db_dependency,
-                                return_to: Literal["/todos/todo-page", "/admin/todos-page"]
+                                #return_to: Literal["/todos/todo-page", "/admin/todos-page"]
                             ):
     try:
         user = await get_current_user(request.cookies.get("access_token"))
@@ -70,7 +70,8 @@ async def render_edit_todo_page(request: Request,
         todo = db.query(Todos).filter(Todos.id == todo_id).first()
         return templates.TemplateResponse(name="edit-todo.html",
         request=request,
-        context={"todo": todo, "user": user, "return_to": return_to}
+        # context={"todo": todo, "user": user, "return_to": return_to, "is_admin": False}
+        context={"todo": todo, "user": user, "is_admin": False}
         )
     except Exception as e:
         print(f"Exception: {e}")

@@ -7,6 +7,7 @@
             const form = event.target;
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
+            const isAdmin = form.dataset.isAdmin === "true";    
 
             const payload = {
                 title: data.title,
@@ -14,9 +15,18 @@
                 priority: parseInt(data.priority),
                 complete: false
             };
+            
+            if (isAdmin) {
+                var url = window.location.pathname;
+                const ownerId = url.substring(url.lastIndexOf('/') + 1);
+                update_url = `/admin/todo/${ownerId}`
+            }
+            else {
+                update_url = '/todos/todo'
+            }
 
             try {
-                const response = await fetch('/todos/todo', {
+                const response = await fetch( update_url, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -42,6 +52,8 @@
     // Edit Todo JS
     const editTodoForm = document.getElementById('editTodoForm');
     if (editTodoForm) {
+        const isAdmin = editTodoForm.dataset.isAdmin === "true";
+
         editTodoForm.addEventListener('submit', async function (event) {
         event.preventDefault();
         const form = event.target;
@@ -65,8 +77,10 @@
             }
 
             console.log(`${todoId}`)
+            console.log(`isAdmin: ${isAdmin}`)
 
-            const response = await fetch(`/todos/todo/${todoId}`, {
+            update_url = isAdmin ? `/admin/todo/${todoId}` : `/todos/todo/${todoId}`;
+            const response = await fetch(update_url, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -98,7 +112,13 @@
                     throw new Error('Authentication token not found');
                 }
 
-                const response = await fetch(`/todos/todo/${todoId}`, {
+                if (isAdmin) {
+                    update_url = `/admin/todo/${todoId}`;
+                }
+                else {
+                    update_url = `/todos/todo/${todoId}`;
+                }
+                const response = await fetch(update_url, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -214,7 +234,6 @@
     }
 
 
-    
     // Edit User JS
     const editUserForm = document.getElementById('editUserForm');
     if (editUserForm) {
@@ -257,10 +276,7 @@
             else {
                 update_url = "/user/user/"
             }
-            // const userId = url.substring(url.lastIndexOf('/') + 1);
-            // console.log(`url: ${url}`);
-            // update_url = isAdmin ? "/admin/user/${userId}" : "/user/user/"
-            
+
             const response = await fetch(update_url, {
                 method: 'PUT',
                 headers: {

@@ -5,9 +5,7 @@ from sqlalchemy.orm import Session
 from ..models import Todos, Users
 from ..database import SessionLocal
 from .auth import get_current_user
-from .todos import TodoRequest
-from .users import UserRequest
-from ..schemas import TodoRequest, UserRequest, AdminUserRequest
+from ..schemas import TodoRequest, UserRequest, AdminUserRequest, AdminTodoRequest
 from .routers_utils import redirect_to_login
 from fastapi.templating import Jinja2Templates
 
@@ -77,7 +75,6 @@ async def render_users_page(request: Request, db: db_dependency):
         return redirect_to_login()
 
 
-
 @router.get("/edit-user-page/{user_id}")
 async def render_edit_user_page(request: Request,
                                 user_id: int,
@@ -99,6 +96,52 @@ async def render_edit_user_page(request: Request,
             name="user.html",
             request=request,
             context={"user_data": user_data, "user": user, "is_admin": True}
+        )
+    except Exception as e:
+        print(f"Exception: {e}")
+
+
+@router.get("/edit-todo-page/{todo_id}")
+async def render_edit_todo_page(request: Request,
+                                todo_id: int,
+                                db: db_dependency,
+                            ):
+    try:
+        user = await get_current_user(request.cookies.get("access_token"))
+        if user is None or user.get("role") != "admin":
+            return redirect_to_login()
+    except Exception as e:
+        print(f"Exception: {e}")
+        return redirect_to_login()
+
+    try:
+        todo_data = db.query(Todos).filter(Todos.id == todo_id).first()
+        print(f"Todo data: {todo_data}")
+        return templates.TemplateResponse(
+            name="edit-todo.html",
+            request=request,
+            context={"todo": todo_data, "user": user, "is_admin": True}
+        )
+    except Exception as e:
+        print(f"Exception: {e}")
+
+
+@router.get("/add-todo-page/{owner_id}")
+async def render_add_todo_page(request: Request, owner_id: int, db: db_dependency):
+    try:
+        user = await get_current_user(request.cookies.get("access_token"))
+        if user is None or user.get("role") != "admin":
+            return redirect_to_login()
+
+    except Exception as e:
+        print(f"Exception: {e}")
+        return redirect_to_login()
+
+    try:
+        return templates.TemplateResponse(
+            name="add-todo.html",
+            request=request,
+            context={"user": user, "owner_id": owner_id, "is_admin": True}
         )
     except Exception as e:
         print(f"Exception: {e}")
@@ -138,7 +181,7 @@ async def update_todo(user: user_dependency, todo_request: TodoRequest, db: db_d
 
 
 @router.put("/user/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def update_user(user_id:int,user: user_dependency, user_admin_request: AdminUserRequest, db: db_dependency):
+async def update_user(user_id:int, user: user_dependency, user_admin_request: AdminUserRequest, db: db_dependency):
     if user is None or user.get("role") != "admin":
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication failed")
     user_model = db.query(Users).filter(Users.id == user_id).first()
@@ -150,4 +193,14 @@ async def update_user(user_id:int,user: user_dependency, user_admin_request: Adm
         setattr(user_model, field, value)
 
     db.add(user_model)
+    db.commit()
+
+
+@router.post("/todo/{owner_id}", status_code=status.HTTP_201_CREATED)
+async def create_todo(owner_id:int,user: user_dependency, todo_request: TodoRequest, db: db_dependency):
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication failed")
+    todo_model = Todos(**todo_request.model_dump(), owner_id=owner_id)
+
+    db.add(todo_model)
     db.commit()

@@ -11,7 +11,7 @@
             </p>
             <hr style="border-top: 3px solid rgba(0, 0, 0, 0.1)">
             {% for user_todos in users_todos %}
-            <h6 class="mt-3">ToDos for <a href="/user/edit-user-page/{{user_todos.user_id}}">{{user_todos.username}}</a></h6>
+            <h6 class="mt-3">ToDos for <a href="/admin/edit-user-page/{{user_todos.user_id}}">{{user_todos.username}}</a></h6>
             <table class="table table-header">
                 <thead>
                     <tr>
@@ -37,7 +37,7 @@
                             </td>
                         </form>
                         <td>
-                            <button onclick="window.location.href='/todos/edit-todo-page/{{todo.id}}"
+                            <button onclick="window.location.href='/admin/edit-todo-page/{{todo.id}}'"
                             type="button" class="btn btn-info">
                             Edit
                             </button>
@@ -47,8 +47,8 @@
                 {% endfor %}
             </tbody>
         </table>
-        <a href="add-todo-page" class="btn btn-primary">Add a new ToDo!</a>
-        <a href="edit-todo" class="btn btn-default">Mark all completed!</a>
+        <a href="add-todo-page/{{user_todos.user_id}}" class="btn btn-primary">Add a new ToDo!</a>
+        <a href="" class="btn btn-default">Mark all completed!</a>
         <hr style="border-top: 3px solid rgba(0, 0, 0, 0.1)">
             {% endfor %}
         </div>

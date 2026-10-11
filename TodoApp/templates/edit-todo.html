@@ -5,7 +5,7 @@
             Edit the todo
         </div>
         <div class="card-body">
-            <form id="editTodoForm">
+            <form id="editTodoForm" data-is-admin="{{ 'true' if is_admin else 'false' }}">
                 <div class="form-group">
                     <label>Title</label>
                     <input type="text" class="form-contr" name="title" value="{{todo.title}}" required>

@@ -5,7 +5,7 @@
             Make a new todo
         </div>
         <div class="card-body">
-            <form id="todoForm">
+            <form id="todoForm" data-is-admin="{{ 'true' if is_admin else 'false' }}" data-owner-id="{{ owner_id }}">
                 <div class="form-group">
                     <label>Title</label>
                     <input type="text" class="form-contr" name="title" required>
